@@ -1,22 +1,17 @@
-import { useEffect, useState } from "react";
-import { getAlerts } from "./services/api";
+import { Routes, Route } from "react-router-dom";
+import Navbar from "./components/Navbar";
+import Home from "./pages/Home";
+import Dashboard from "./pages/Dashboard";
 
 function App() {
-  const [alerts, setAlerts] = useState([]);
-
-  useEffect(() => {
-    getAlerts().then((res) => setAlerts(res.data));
-  }, []);
-
   return (
-    <div style={{ padding: 20 }}>
-      <h1>🌊 Coastal Guard AI</h1>
-      {alerts.map((a) => (
-        <div key={a.id}>
-          <b>{a.location}</b>: {a.type} ({a.risk})
-        </div>
-      ))}
-    </div>
+    <>
+      <Navbar />
+      <Routes>
+        <Route path="/" element={<Home />} />
+        <Route path="/dashboard" element={<Dashboard />} />
+      </Routes>
+    </>
   );
 }
 
