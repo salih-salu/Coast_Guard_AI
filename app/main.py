@@ -3,12 +3,18 @@ from fastapi.middleware.cors import CORSMiddleware
 import httpx
 from fastapi import FastAPI, HTTPException
 
+import os
+from datetime import datetime
+from pydantic import BaseModel
+from openpyxl import Workbook, load_workbook
+
 app = FastAPI(title="Coastal Guard AI")
 
 # Allow React (running on port 5173) to talk to this backend
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173"],
+    allow_origins=["*"],
+    allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
@@ -27,18 +33,7 @@ def get_alerts():
         {"id": 4, "location": "Trivandrum", "risk": "High", "type": "Strong currents"},
     ]
     
-# @app.get("/api/weather")
-# def get_weather():
-#     # Dummy data for now; replace with a real marine API later
-#     return {
-#         "location": "Kochi",
-#         "temp": 28,
-#         "condition": "Partly Cloudy",
-#         "wave_height": 1.8,
-#         "wind_speed": 24,
-#         "humidity": 72,
-#         "visibility": 8,
-#     }
+
 
 
 KERALA_PLACES = {
@@ -100,3 +95,34 @@ def get_weather(city: str = "Kochi"):
         "humidity": weather["relative_humidity_2m"],
         "visibility": round((weather.get("visibility") or 0) / 1000, 1),
     }
+    
+# 1. Define the data model
+class RegisterRequest(BaseModel):
+    name: str
+    email: str
+    phone: str
+    password: str
+EXCEL_FILE = "users.xlsx"
+# 2. Helper function to save row to Excel
+def append_user_to_excel(name: str, email: str, phone: str):
+    if not os.path.exists(EXCEL_FILE):
+        wb = Workbook()
+        ws = wb.active
+        ws.title = "Users"
+        # Create column headers
+        ws.append(["Full Name", "Email", "Phone", "Registered At"])
+    else:
+        wb = load_workbook(EXCEL_FILE)
+        ws = wb.active
+    # Append new user row (omitting password for safety)
+    timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    ws.append([name, email, phone, timestamp])
+    wb.save(EXCEL_FILE)
+# 3. FastAPI Endpoint
+@app.post("/api/register")
+def register(user: RegisterRequest):
+    try:
+        append_user_to_excel(user.name, user.email, user.phone)
+        return {"status": "success", "message": "Registered successfully"}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
