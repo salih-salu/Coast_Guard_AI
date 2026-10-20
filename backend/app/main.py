@@ -1,12 +1,20 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+import httpx
+from fastapi import FastAPI, HTTPException
+
+import os
+from datetime import datetime
+from pydantic import BaseModel
+from openpyxl import Workbook, load_workbook
 
 app = FastAPI(title="Coastal Guard AI")
 
 # Allow React (running on port 5173) to talk to this backend
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173"],
+    allow_origins=["*"],
+    allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
@@ -24,3 +32,97 @@ def get_alerts():
         {'id': 3, "location": "Kollam", "risk": "Low", "type": "Minor debris"},
         {"id": 4, "location": "Trivandrum", "risk": "High", "type": "Strong currents"},
     ]
+    
+
+
+
+KERALA_PLACES = {
+    "Kochi":              {"lat": 9.9312,  "lon": 76.2673, "sea_lat": 9.95,  "sea_lon": 76.10},
+    "Thiruvananthapuram": {"lat": 8.5241,  "lon": 76.9366, "sea_lat": 8.45,  "sea_lon": 76.85},
+    "Kozhikode":          {"lat": 11.2588, "lon": 75.7804, "sea_lat": 11.26, "sea_lon": 75.65},
+    "Alappuzha":          {"lat": 9.4981,  "lon": 76.3388, "sea_lat": 9.50,  "sea_lon": 76.20},
+    "Kollam":             {"lat": 8.8932,  "lon": 76.6141, "sea_lat": 8.88,  "sea_lon": 76.50},
+    "Kannur":             {"lat": 11.8745, "lon": 75.3704, "sea_lat": 11.88, "sea_lon": 75.25},
+}
+
+WEATHER_CODES = {
+    0: "Clear sky", 1: "Mostly clear", 2: "Partly cloudy", 3: "Overcast",
+    45: "Fog", 48: "Fog",
+    51: "Light drizzle", 53: "Drizzle", 55: "Heavy drizzle",
+    61: "Light rain", 63: "Rain", 65: "Heavy rain",
+    80: "Rain showers", 81: "Rain showers", 82: "Violent rain showers",
+    95: "Thunderstorm", 96: "Thunderstorm with hail", 99: "Thunderstorm with hail",
+}
+
+@app.get("/api/weather")
+def get_weather(city: str = "Kochi"):
+    place = KERALA_PLACES.get(city)
+    if not place:
+        raise HTTPException(status_code=404, detail="City not supported")
+
+    try:
+        weather = httpx.get(
+            "https://api.open-meteo.com/v1/forecast",
+            params={
+                "latitude": place["lat"],
+                "longitude": place["lon"],
+                "current": "temperature_2m,relative_humidity_2m,weather_code,wind_speed_10m,visibility",
+                "timezone": "Asia/Kolkata",
+            },
+            timeout=10,
+        ).json()["current"]
+
+        marine = httpx.get(
+            "https://marine-api.open-meteo.com/v1/marine",
+            params={
+                "latitude": place["sea_lat"],
+                "longitude": place["sea_lon"],
+                "current": "wave_height",
+                "timezone": "Asia/Kolkata",
+            },
+            timeout=10,
+        ).json()
+        wave = marine.get("current", {}).get("wave_height")
+    except Exception:
+        raise HTTPException(status_code=502, detail="Weather service unavailable")
+
+    return {
+        "location": f"{city}, Kerala",
+        "temp": round(weather["temperature_2m"]),
+        "condition": WEATHER_CODES.get(weather["weather_code"], "Unknown"),
+        "wave_height": wave if wave is not None else 0,
+        "wind_speed": round(weather["wind_speed_10m"]),
+        "humidity": weather["relative_humidity_2m"],
+        "visibility": round((weather.get("visibility") or 0) / 1000, 1),
+    }
+    
+# 1. Define the data model
+class RegisterRequest(BaseModel):
+    name: str
+    email: str
+    phone: str
+    password: str
+EXCEL_FILE = "users.xlsx"
+# 2. Helper function to save row to Excel
+def append_user_to_excel(name: str, email: str, phone: str):
+    if not os.path.exists(EXCEL_FILE):
+        wb = Workbook()
+        ws = wb.active
+        ws.title = "Users"
+        # Create column headers
+        ws.append(["Full Name", "Email", "Phone", "Registered At"])
+    else:
+        wb = load_workbook(EXCEL_FILE)
+        ws = wb.active
+    # Append new user row (omitting password for safety)
+    timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    ws.append([name, email, phone, timestamp])
+    wb.save(EXCEL_FILE)
+# 3. FastAPI Endpoint
+@app.post("/api/register")
+def register(user: RegisterRequest):
+    try:
+        append_user_to_excel(user.name, user.email, user.phone)
+        return {"status": "success", "message": "Registered successfully"}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
