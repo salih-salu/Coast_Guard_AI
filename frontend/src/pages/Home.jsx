@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from "react";
 import { getAlerts, getWeather } from "../services/api";
 import { contacts } from "../data/contacts";
@@ -10,13 +9,37 @@ function Home({ onSOS }) {
   const [error, setError] = useState(false);
 
   useEffect(() => {
-    Promise.all([getAlerts(), getWeather()])
-      .then(([a, w]) => {
+    const fetchHomeData = async (weatherParams = {}) => {
+      try {
+        const [a, w] = await Promise.all([
+          getAlerts(),
+          getWeather(weatherParams),
+        ]);
         setAlerts(a.data);
         setWeather(w.data);
-      })
-      .catch(() => setError(true))
-      .finally(() => setLoading(false));
+      } catch {
+        setError(true);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if ("geolocation" in navigator) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          fetchHomeData({
+            lat: position.coords.latitude,
+            lon: position.coords.longitude,
+          });
+        },
+        () => {
+          fetchHomeData();
+        },
+        { timeout: 7000 }
+      );
+    } else {
+      fetchHomeData();
+    }
   }, []);
 
   const count = (level) =>
@@ -32,121 +55,98 @@ function Home({ onSOS }) {
       {/* HERO */}
       <section className="hero">
         <div className="container">
-          {/* <span className="badge">
-            ● Live coastal safety platform
-          </span> */}
+          <div className="hero-content">
 
-          <h1>
-            Protecting our coastline with{" "}
-            <span>Artificial Intelligence</span>
-          </h1>
+            <h1>
+              Navigating Risk.
+              <br />
+              <span>Delivering Safety</span>
+            </h1>
 
-          {/* <p>
-            Real-time weather, risk alerts and emergency help
-            for coastal communities and fishermen.
-          </p> */}
 
-          <button
-            className="btn btn-sos big"
-            onClick={onSOS}
-          >
-            🚨 Emergency SOS
-          </button>
-
-          <a href="#alerts" className="btn btn-ghost">
-            View Active Alerts
-          </a>
+            <div className="hero-actions">
+              <button className="btn btn-sos big" onClick={onSOS}>
+                🚨 Emergency SOS
+              </button>
+              <a href="#alerts" className="btn btn-ghost">
+                View Active Alerts
+              </a>
+            </div>
+          </div>
         </div>
       </section>
 
-      {/* BACKEND STATUS */}
+      {/* STATUS MESSAGES */}
       {loading && (
-        <p className="message">Loading live data...</p>
+        <p className="message">Loading live data…</p>
       )}
 
       {error && (
-        <p className="message">
+        <p className="message error-message">
           ⚠️ Could not reach the backend. Is FastAPI running?
         </p>
       )}
 
-      {/* WEATHER AND EMERGENCY CONTACTS */}
+      {/* DASHBOARD: WEATHER + CONTACTS */}
       <div className="container dashboard-layout">
-        {/* LIVE WEATHER - LEFT */}
+        {/* LIVE WEATHER */}
         <section className="dashboard-weather" id="weather">
-          <h2 className="section-title">
-            🌤️ Live Weather
-          </h2>
+          <div className="section-header">
+            <h2 className="section-title">🌤️ Live Weather</h2>
+          </div>
 
           {weather ? (
             <div className="weather-card">
               <div className="weather-main">
-                <p className="muted">
+                <p className="location">
                   📍 {weather.location}
                 </p>
 
-                <div className="temp">
-                  {weather.temp}°C
-                </div>
+                <div className="temp">{weather.temp}°C</div>
+                <p className="condition">{weather.condition}</p>
 
-                <p>{weather.condition}</p>
-
-                <span
-                  className={`status ${
-                    safe ? "safe" : "danger"
-                  }`}
-                >
-                  {safe
-                    ? "✅ Safe to go to sea"
-                    : "⚠️ Not safe for sea travel"}
+                <span className={`status ${safe ? "safe" : "danger"}`}>
+                  {safe ? "✅ Safe to go to sea" : "⚠️ Not safe for sea travel"}
                 </span>
               </div>
 
               <div className="weather-grid">
                 <div className="mini">
-                  <span>🌊</span>
+                  <span className="mini-icon">🌊</span>
                   <b>{weather.wave_height} m</b>
                   <small>Wave height</small>
                 </div>
-
                 <div className="mini">
-                  <span>💨</span>
+                  <span className="mini-icon">💨</span>
                   <b>{weather.wind_speed} km/h</b>
                   <small>Wind speed</small>
                 </div>
-
                 <div className="mini">
-                  <span>💧</span>
+                  <span className="mini-icon">💧</span>
                   <b>{weather.humidity}%</b>
                   <small>Humidity</small>
                 </div>
-
                 <div className="mini">
-                  <span>👁️</span>
+                  <span className="mini-icon">👁️</span>
                   <b>{weather.visibility} km</b>
                   <small>Visibility</small>
                 </div>
               </div>
             </div>
           ) : (
-            <div className="weather-card">
+            <div className="weather-card empty-card">
               <p className="message">
-                {loading
-                  ? "Loading live weather..."
-                  : "Weather data unavailable."}
+                {loading ? "Loading live weather…" : "Weather data unavailable."}
               </p>
             </div>
           )}
         </section>
 
-        {/* EMERGENCY CONTACTS - TOP RIGHT */}
-        <section
-          className="dashboard-emergency"
-          id="contacts"
-        >
-          <h2 className="section-title">
-            📞 Emergency Contacts
-          </h2>
+        {/* EMERGENCY CONTACTS */}
+        <section className="dashboard-emergency" id="contacts">
+          <div className="section-header">
+            <h2 className="section-title">📞 Emergency Contacts</h2>
+          </div>
 
           <div className="contact-grid">
             {contacts.map((c) => (
@@ -156,7 +156,6 @@ function Home({ onSOS }) {
                 className="contact"
               >
                 <div className="icon">{c.icon}</div>
-
                 <div className="contact-details">
                   <h4>{c.name}</h4>
                   <b>{c.number}</b>
@@ -170,26 +169,25 @@ function Home({ onSOS }) {
       {/* ACTIVE ALERTS */}
       {!loading && !error && (
         <section className="container block" id="alerts">
-          <h2 className="section-title">
-            🚨 Active Alerts for Coastal Areas
-          </h2>
+          <div className="section-header">
+            <h2 className="section-title">
+              🚨 Active Alerts for Coastal Areas
+            </h2>
+          </div>
 
           <div className="stats">
             <div className="stat">
               <div className="num">{alerts.length}</div>
               <div className="label">Total Alerts</div>
             </div>
-
             <div className="stat high">
               <div className="num">{count("High")}</div>
               <div className="label">High Risk</div>
             </div>
-
             <div className="stat medium">
               <div className="num">{count("Medium")}</div>
               <div className="label">Medium Risk</div>
             </div>
-
             <div className="stat low">
               <div className="num">{count("Low")}</div>
               <div className="label">Low Risk</div>
@@ -202,14 +200,13 @@ function Home({ onSOS }) {
                 key={a.id}
                 className={`alert-card ${a.risk.toLowerCase()}`}
               >
-                <h4>📍 {a.location}</h4>
+                <div className="alert-top">
+                  <h4>📍 {a.location}</h4>
+                  <span className={`risk ${a.risk.toLowerCase()}`}>
+                    {a.risk.toUpperCase()}
+                  </span>
+                </div>
                 <p>{a.type}</p>
-
-                <span
-                  className={`risk ${a.risk.toLowerCase()}`}
-                >
-                  {a.risk.toUpperCase()} RISK
-                </span>
               </div>
             ))}
           </div>
