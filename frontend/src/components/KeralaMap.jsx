@@ -1,46 +1,47 @@
 import { useState, useEffect, useRef } from "react";
+import { getLocations } from "../services/api";
 
 // District-level risk status (shared by all coastal locations in that district)
 const DISTRICTS = {
-  Kasaragod:          { risk: "High",     waves: "2.8m", wind: "38 km/h", status: "High surge advisory" },
-  Kannur:             { risk: "High",     waves: "2.7m", wind: "35 km/h", status: "Strong inshore rip currents" },
-  Kozhikode:          { risk: "High",     waves: "2.6m", wind: "32 km/h", status: "Rough sea alert near beach" },
-  Malappuram:         { risk: "High",     waves: "2.5m", wind: "30 km/h", status: "High tidal swell" },
-  Thrissur:           { risk: "Moderate", waves: "2.0m", wind: "24 km/h", status: "Moderate sea condition" },
-  Ernakulam:          { risk: "Moderate", waves: "1.9m", wind: "22 km/h", status: "Caution for small craft" },
-  Alappuzha:          { risk: "Moderate", waves: "1.8m", wind: "20 km/h", status: "Safe inside harbour lines" },
-  Kollam:             { risk: "Low",      waves: "1.3m", wind: "16 km/h", status: "Normal waves" },
-  Thiruvananthapuram: { risk: "Low",      waves: "1.4m", wind: "17 km/h", status: "Safe for visitors" },
+  Kasaragod: { risk: "High", waves: "2.8m", wind: "38 km/h", status: "High surge advisory" },
+  Kannur: { risk: "High", waves: "2.7m", wind: "35 km/h", status: "Strong inshore rip currents" },
+  Kozhikode: { risk: "High", waves: "2.6m", wind: "32 km/h", status: "Rough sea alert near beach" },
+  Malappuram: { risk: "High", waves: "2.5m", wind: "30 km/h", status: "High tidal swell" },
+  Thrissur: { risk: "Moderate", waves: "2.0m", wind: "24 km/h", status: "Moderate sea condition" },
+  Ernakulam: { risk: "Moderate", waves: "1.9m", wind: "22 km/h", status: "Caution for small craft" },
+  Alappuzha: { risk: "Moderate", waves: "1.8m", wind: "20 km/h", status: "Safe inside harbour lines" },
+  Kollam: { risk: "Low", waves: "1.3m", wind: "16 km/h", status: "Normal waves" },
+  Thiruvananthapuram: { risk: "Low", waves: "1.4m", wind: "17 km/h", status: "Safe for visitors" },
 };
 
 // 25 coastal locations (south -> north). Add per-location values
 // (risk / waves / wind / status) to any entry to override its district's values.
 const COASTAL_LOCATIONS = [
-  { name: "Vizhinjam",       district: "Thiruvananthapuram", lat: 8.3745,  lon: 76.9919 },
-  { name: "Poovar",          district: "Thiruvananthapuram", lat: 8.3178,  lon: 77.0757 },
-  { name: "Valiathura",      district: "Thiruvananthapuram", lat: 8.4604,  lon: 76.9396 },
-  { name: "Shanghumugham",   district: "Thiruvananthapuram", lat: 8.4776,  lon: 76.9128 },
-  { name: "Varkala",         district: "Thiruvananthapuram", lat: 8.7330,  lon: 76.7040 },
-  { name: "Kollam Beach",    district: "Kollam",             lat: 8.8768,  lon: 76.5897 },
-  { name: "Neendakara",      district: "Kollam",             lat: 8.9390,  lon: 76.5380 },
-  { name: "Azheekal",        district: "Kollam",             lat: 9.1040,  lon: 76.4780 },
-  { name: "Alappuzha Beach", district: "Alappuzha",          lat: 9.4900,  lon: 76.3220 },
-  { name: "Arthunkal",       district: "Alappuzha",          lat: 9.6710,  lon: 76.2990 },
-  { name: "Chellanam",       district: "Ernakulam",          lat: 9.8100,  lon: 76.2660 },
-  { name: "Fort Kochi",      district: "Ernakulam",          lat: 9.9658,  lon: 76.2421 },
-  { name: "Cherai Beach",    district: "Ernakulam",          lat: 10.1420, lon: 76.1790 },
-  { name: "Munambam",        district: "Ernakulam",          lat: 10.1770, lon: 76.1720 },
-  { name: "Kodungallur",     district: "Thrissur",           lat: 10.2100, lon: 76.1750 },
-  { name: "Chavakkad",       district: "Thrissur",           lat: 10.5850, lon: 76.0010 },
-  { name: "Ponnani",         district: "Malappuram",         lat: 10.7700, lon: 75.9200 },
-  { name: "Tanur",           district: "Malappuram",         lat: 10.9680, lon: 75.8710 },
-  { name: "Beypore",         district: "Kozhikode",          lat: 11.1700, lon: 75.8070 },
-  { name: "Kozhikode Beach", district: "Kozhikode",          lat: 11.2620, lon: 75.7680 },
-  { name: "Koyilandy",       district: "Kozhikode",          lat: 11.4340, lon: 75.6930 },
-  { name: "Thalassery",      district: "Kannur",             lat: 11.7490, lon: 75.4890 },
-  { name: "Payyambalam",     district: "Kannur",             lat: 11.8660, lon: 75.3480 },
-  { name: "Bekal",           district: "Kasaragod",          lat: 12.3930, lon: 75.0300 },
-  { name: "Kumbla",          district: "Kasaragod",          lat: 12.5760, lon: 74.9490 },
+  { name: "Vizhinjam", district: "Thiruvananthapuram", lat: 8.3745, lon: 76.9919 },
+  { name: "Poovar", district: "Thiruvananthapuram", lat: 8.3178, lon: 77.0757 },
+  { name: "Valiathura", district: "Thiruvananthapuram", lat: 8.4604, lon: 76.9396 },
+  { name: "Shanghumugham", district: "Thiruvananthapuram", lat: 8.4776, lon: 76.9128 },
+  { name: "Varkala", district: "Thiruvananthapuram", lat: 8.7330, lon: 76.7040 },
+  { name: "Kollam Beach", district: "Kollam", lat: 8.8768, lon: 76.5897 },
+  { name: "Neendakara", district: "Kollam", lat: 8.9390, lon: 76.5380 },
+  { name: "Azheekal", district: "Kollam", lat: 9.1040, lon: 76.4780 },
+  { name: "Alappuzha Beach", district: "Alappuzha", lat: 9.4900, lon: 76.3220 },
+  { name: "Arthunkal", district: "Alappuzha", lat: 9.6710, lon: 76.2990 },
+  { name: "Chellanam", district: "Ernakulam", lat: 9.8100, lon: 76.2660 },
+  { name: "Fort Kochi", district: "Ernakulam", lat: 9.9658, lon: 76.2421 },
+  { name: "Cherai Beach", district: "Ernakulam", lat: 10.1420, lon: 76.1790 },
+  { name: "Munambam", district: "Ernakulam", lat: 10.1770, lon: 76.1720 },
+  { name: "Kodungallur", district: "Thrissur", lat: 10.2100, lon: 76.1750 },
+  { name: "Chavakkad", district: "Thrissur", lat: 10.5850, lon: 76.0010 },
+  { name: "Ponnani", district: "Malappuram", lat: 10.7700, lon: 75.9200 },
+  { name: "Tanur", district: "Malappuram", lat: 10.9680, lon: 75.8710 },
+  { name: "Beypore", district: "Kozhikode", lat: 11.1700, lon: 75.8070 },
+  { name: "Kozhikode Beach", district: "Kozhikode", lat: 11.2620, lon: 75.7680 },
+  { name: "Koyilandy", district: "Kozhikode", lat: 11.4340, lon: 75.6930 },
+  { name: "Thalassery", district: "Kannur", lat: 11.7490, lon: 75.4890 },
+  { name: "Payyambalam", district: "Kannur", lat: 11.8660, lon: 75.3480 },
+  { name: "Bekal", district: "Kasaragod", lat: 12.3930, lon: 75.0300 },
+  { name: "Kumbla", district: "Kasaragod", lat: 12.5760, lon: 74.9490 },
 ].map((loc) => ({ ...DISTRICTS[loc.district], ...loc }));
 
 // Real Kerala state outline (381 points) as [lon, lat].
@@ -184,7 +185,7 @@ function KeralaMap() {
 
       // Fit first, then lock the minimum zoom so users can't zoom out past Kerala
       map.fitBounds(keralaBounds, { padding: [20, 20] });
-      map.setMinZoom(map.getZoom()-1);
+      map.setMinZoom(map.getZoom() - 1);
       map.setMaxZoom(13);
 
       const tiles = L.tileLayer("https://mt1.google.com/vt/lyrs=m&x={x}&y={y}&z={z}", {
@@ -237,18 +238,65 @@ function KeralaMap() {
         }
       ).addTo(map);
 
-      // Coastal location markers (small pins + name labels)
-      COASTAL_LOCATIONS.forEach((loc) => {
+      // // Coastal location markers (small pins + name labels)
+      // COASTAL_LOCATIONS.forEach((loc) => {
+      //   const color = riskColor(loc.risk);
+      //   const icon = L.divIcon({
+      //     className: "custom-coastal-pin",
+      //     html: `<div style="background:${color};width:12px;height:12px;border-radius:50%;border:2px solid #fff;box-shadow:0 0 8px ${color};"></div>`,
+      //     iconSize: [12, 12],
+      //     iconAnchor: [6, 6],
+      //   });
+      //   const marker = L.marker([loc.lat, loc.lon], { icon }).addTo(map);
+      //   marker.on("click", () => setSelectedZone(loc));
+      //   // Name label next to the pin (hidden when zoomed far out, see CSS)
+      //   marker.bindTooltip(`${loc.name}`, {
+      //     permanent: true,
+      //     direction: "left",
+      //     offset: [-8, 0],
+      //     className: "coastal-label",
+      //   });
+      // });
+
+      // Fetch locations dynamically from the database
+      let dbLocations = [];
+      try {
+        const locRes = await getLocations();
+        if (Array.isArray(locRes?.data) && locRes.data.length > 0) {
+          dbLocations = locRes.data.map((item) => ({
+            name: item.name,
+            district: item.district,
+            lat: parseFloat(item.latitude),
+            lon: parseFloat(item.longitude),
+            risk: (item.risk_level || "low").charAt(0).toUpperCase() + (item.risk_level || "low").slice(1),
+            type: item.location_type || "coastal",
+            population: item.population,
+            hazard: item.primary_hazard || "Coastal swell",
+            waves: item.risk_level === "high" ? "2.8m" : item.risk_level === "medium" ? "2.0m" : "1.4m",
+            wind: item.risk_level === "high" ? "36 km/h" : item.risk_level === "medium" ? "24 km/h" : "16 km/h",
+            status: item.primary_hazard || "Normal sea condition",
+          }));
+        }
+      } catch (err) {
+        console.warn("Could not load DB locations, using fallback array:", err);
+      }
+
+      // If database is empty or offline, use the fallback COASTAL_LOCATIONS
+      const locationsToRender = dbLocations.length > 0 ? dbLocations : COASTAL_LOCATIONS;
+
+      // Add pins to Leaflet map
+      locationsToRender.forEach((loc) => {
         const color = riskColor(loc.risk);
         const icon = L.divIcon({
           className: "custom-coastal-pin",
-          html: `<div style="background:${color};width:12px;height:12px;border-radius:50%;border:2px solid #fff;box-shadow:0 0 8px ${color};"></div>`,
-          iconSize: [12, 12],
+          html: `<div style="background:${color};width:13px;height:13px;border-radius:50%;border:2px solid #fff;box-shadow:0 0 10px ${color};"></div>`,
+          iconSize: [13, 13],
           iconAnchor: [6, 6],
         });
+
         const marker = L.marker([loc.lat, loc.lon], { icon }).addTo(map);
         marker.on("click", () => setSelectedZone(loc));
-        // Name label next to the pin (hidden when zoomed far out, see CSS)
+
         marker.bindTooltip(`${loc.name}`, {
           permanent: true,
           direction: "left",
@@ -256,6 +304,54 @@ function KeralaMap() {
           className: "coastal-label",
         });
       });
+
+      // -------------------------------------------------------------
+      // Add Exact Live User Location Beacon to the Map
+      // -------------------------------------------------------------
+      if ("geolocation" in navigator) {
+        navigator.geolocation.getCurrentPosition(
+          (pos) => {
+            const userLat = pos.coords.latitude;
+            const userLon = pos.coords.longitude;
+
+            // Check if user is in/near Kerala bounds
+            if (userLat >= 8.15 && userLat <= 12.85 && userLon >= 74.8 && userLon <= 77.4) {
+              const liveIcon = L.divIcon({
+                className: "custom-live-user",
+                html: `
+                  <div class="live-user-pin">
+                    <div class="live-user-pulse"></div>
+                  </div>
+                `,
+                iconSize: [18, 18],
+                iconAnchor: [9, 9],
+              });
+
+              const userMarker = L.marker([userLat, userLon], { icon: liveIcon, zIndexOffset: 1000 }).addTo(map);
+
+              userMarker.bindTooltip("📍 You Are Here (Live)", {
+                permanent: true,
+                direction: "top",
+                offset: [0, -10],
+                className: "live-user-label",
+              });
+
+              userMarker.on("click", () => {
+                setSelectedZone({
+                  name: "Your Live Location",
+                  district: "Current Coordinates",
+                  risk: "Low",
+                  waves: "Live",
+                  wind: "Live",
+                  status: `Lat: ${userLat.toFixed(3)}, Lon: ${userLon.toFixed(3)}`,
+                });
+              });
+            }
+          },
+          (err) => console.log("Map GPS notice:", err.message),
+          { enableHighAccuracy: false, timeout: 10000 }
+        );
+      }
 
       // Show labels only when zoomed in enough to avoid overlap
       const updateLabels = () => {
@@ -306,24 +402,23 @@ function KeralaMap() {
             <div ref={mapContainerRef} className="real-map-canvas" />
 
             {selectedZone && (
-              <div className="selected-zone-bar">
-                <div className="zone-meta">
-                  <span className="risk-tag" style={{ background: riskColor(selectedZone.risk) }}>
-                    ● {selectedZone.risk.toUpperCase()} RISK
-                  </span>
-                  <b>📍 {selectedZone.name}</b>
-                  <p>{selectedZone.district} District · {selectedZone.status}</p>
-                </div>
-                <div className="zone-stats">
-                  <div>
-                    <small>Wave Height</small>
-                    <strong>{selectedZone.waves}</strong>
-                  </div>
-                  <div>
-                    <small>Wind Speed</small>
-                    <strong>{selectedZone.wind}</strong>
-                  </div>
-                </div>
+              <div className="zone-meta">
+                <span
+                  className="risk-tag"
+                  style={{ background: riskColor(selectedZone.risk) }}
+                >
+                  ● {(selectedZone.risk || "NORMAL").toUpperCase()} RISK
+                </span>
+                <b>📍 {selectedZone.name}</b>
+                <p>
+                  {selectedZone.district} District
+                  {selectedZone.hazard && ` · ${selectedZone.hazard}`}
+                </p>
+                {selectedZone.population && (
+                  <small style={{ color: "#38bdf8", fontSize: "11px", display: "block", marginTop: "2px" }}>
+                    👥 Population: {selectedZone.population.toLocaleString()}
+                  </small>
+                )}
               </div>
             )}
           </div>

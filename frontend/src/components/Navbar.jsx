@@ -4,7 +4,7 @@ function Navbar({ currentUser, onLogin, onRegister, onLogout, onSOS }) {
   // Destination dashboard based on role
   const role = (currentUser?.role || "").toLowerCase();
   const dashboardPath =
-    role === "admin" ? "/admin" : role === "user" ? "/user" : "/volunteer";
+    role === "admin" ? "/admin" : role === "citizen" ? "/user" : "/volunteer";
 
   return (
     <nav className="navbar">

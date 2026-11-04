@@ -19,7 +19,7 @@ const KERALA_DISTRICTS = [
   "Wayanad",
 ];
 
-function AuthModal({ mode, setMode, onClose, onLoginSuccess  }) {
+function AuthModal({ mode, setMode, onClose, onLoginSuccess }) {
   const navigate = useNavigate();
 
   const [submitting, setSubmitting] = useState(false);
@@ -27,7 +27,8 @@ function AuthModal({ mode, setMode, onClose, onLoginSuccess  }) {
     name: "",
     email: "",
     phone: "",
-    role: "User",
+    role: "citizen",
+    user_type: "resident",
     location: "",
     password: "",
   });
@@ -43,7 +44,7 @@ function AuthModal({ mode, setMode, onClose, onLoginSuccess  }) {
     e.preventDefault();
     setSubmitting(true);
 
-      if (isLogin) {
+    if (isLogin) {
       try {
         const res = await loginUser({
           email: formData.email,
@@ -63,10 +64,10 @@ function AuthModal({ mode, setMode, onClose, onLoginSuccess  }) {
         const role = (loggedInUser?.role || "").trim().toLowerCase();
         if (role === "admin") {
           navigate("/admin");
-        } else if (role === "user") {
+        } else if (role === "citizen") {
           navigate("/user");
         } else {
-          navigate("/volunteer");;
+          navigate("/volunteer");
         }
       } catch (err) {
         alert("Login failed: " + (err.response?.data?.detail || "Invalid email or password"));
@@ -110,9 +111,24 @@ function AuthModal({ mode, setMode, onClose, onLoginSuccess  }) {
               />
 
               <select name="role" value={formData.role} onChange={handleChange} required>
-                <option value="User">Register as User</option>
-                <option value="Volunteer">Register as Volunteer</option>
+                <option value="citizen">Citizen</option>
+                <option value="volunteer">Volunteer</option>
+                <option value="authority">Authority</option>
+                {/* <option value="admin">Admin</option> */}
               </select>
+              {/* Show Fisherman / Resident options only if registering as Citizen */}
+              {formData.role === "citizen" && (
+                <select
+                  name="user_type"
+                  value={formData.user_type}
+                  onChange={handleChange}
+                  required
+                >
+                  <option value="resident">Coastal Resident / Living near shore</option>
+                  <option value="fisherman">Fisherman / Seafarer</option>
+                  <option value="tourist">Visitor / Tourist</option>
+                </select>
+              )}
 
               <select
                 name="location"

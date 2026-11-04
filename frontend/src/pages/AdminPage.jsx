@@ -1,6 +1,9 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
+import WeatherCard from "../components/WeatherCard";
+
+
 function AdminPage({ onLogout, onSOS }) {
   const navigate = useNavigate();
   const [admin, setAdmin] = useState(null);
@@ -118,8 +121,8 @@ function AdminPage({ onLogout, onSOS }) {
           <small className="muted">Open-Meteo & Wave Models active</small>
         </div>
       </div>
-        {/* 4. DISTRICT COASTAL THREAT MATRIX */}
-      <div style={{ background: "var(--card)", border: "1px solid var(--line)", borderRadius: "20px", padding: "28px", marginBottom: "32px"}}>
+      {/* 4. DISTRICT COASTAL THREAT MATRIX */}
+      <div style={{ background: "var(--card)", border: "1px solid var(--line)", borderRadius: "20px", padding: "28px", marginBottom: "32px" }}>
         <h3 style={{ marginBottom: "18px" }}>🌊 Kerala Coastal Threat Matrix</h3>
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))", gap: "16px" }}>
           {districtThreats.map((d, idx) => (
@@ -160,7 +163,7 @@ function AdminPage({ onLogout, onSOS }) {
       <div style={{ background: "var(--card)", border: "1px solid var(--line)", borderRadius: "20px", padding: "28px", marginBottom: "32px" }}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "20px", flexWrap: "wrap", gap: "12px" }}>
           <h3>📋 Registered Accounts (users.xlsx)</h3>
-          
+
           {/* Role Filter */}
           <div style={{ display: "flex", gap: "8px" }}>
             {["All", "User", "Volunteer"].map((role) => (

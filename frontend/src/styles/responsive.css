@@ -1,0 +1,229 @@
+/* ========== Responsive ========== */
+@media (max-width: 1000px) {
+  .dashboard-layout {
+    grid-template-columns: 1fr;
+    gap: 18px;
+  }
+
+  .contact-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 800px) {
+  .nav-links {
+    display: none;
+  }
+
+  .nav-actions .btn-ghost {
+    display: none;
+  }
+
+  .weather-card {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+
+  .weather-main {
+    align-items: flex-start;
+  }
+
+  .hero {
+    padding: 20px 0 18px;
+  }
+
+  .hero-content {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 14px;
+  }
+
+  .hero-actions {
+    justify-content: flex-start;
+  }
+}
+
+@media (max-width: 768px) {
+  .kerala-clean-map-modal {
+    width: calc(100vw - 20px);
+    right: 10px;
+    bottom: 140px;
+    max-height: calc(100vh - 160px);
+  }
+
+  .map-modal-body {
+    grid-template-columns: 1fr;
+  }
+
+  .kerala-map-fab {
+    right: 16px;
+    bottom: 80px;
+    width: 46px;
+    height: 46px;
+  }
+
+  .kerala-real-map-modal {
+    width: calc(100vw - 20px);
+    right: 10px;
+    bottom: 134px;
+    height: 520px;
+  }
+}
+
+@media (max-width: 480px) {
+  .container {
+    padding: 0 12px;
+  }
+
+  .block {
+    padding: 16px 12px 22px;
+  }
+
+  .hero {
+    padding: 16px 0 14px;
+  }
+
+  .hero h1 {
+    font-size: 25px;
+  }
+
+  .hero-subtitle {
+    font-size: 14.5px;
+  }
+
+  /* SOS + alerts button side by side to save vertical space */
+  .hero-actions {
+    flex-direction: row;
+    width: 100%;
+    gap: 8px;
+  }
+
+  .hero-actions .btn {
+    flex: 1;
+    padding: 11px 10px;
+    font-size: 13.5px;
+  }
+
+  .dashboard-layout {
+    margin-top: 14px;
+    gap: 14px;
+  }
+
+  .section-title {
+    font-size: 17px;
+  }
+
+  .weather-card {
+    padding: 16px 14px;
+  }
+
+  .temp {
+    font-size: 42px;
+  }
+
+  .weather-grid {
+    gap: 8px;
+  }
+
+  .mini {
+    padding: 10px 10px;
+  }
+
+  .mini b {
+    font-size: 16px;
+  }
+
+  .contact-grid {
+    gap: 8px;
+  }
+
+  .contact {
+    padding: 9px 10px;
+    gap: 9px;
+  }
+
+  .contact .icon {
+    width: 34px;
+    height: 34px;
+    font-size: 18px;
+  }
+
+  .contact-details b {
+    font-size: 14.5px;
+  }
+
+  .stats {
+    grid-template-columns: repeat(4, 1fr);
+    gap: 6px;
+  }
+
+  .stat {
+    padding: 9px 4px;
+  }
+
+  .stat .num {
+    font-size: 22px;
+  }
+
+  .stat .label {
+    font-size: 10.5px;
+  }
+
+  .alert-grid {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+
+  .btn.big {
+    padding: 11px 16px;
+    font-size: 14px;
+  }
+
+  .modal {
+    padding: 22px 16px;
+  }
+
+  .chat-box {
+    right: 10px;
+    bottom: 80px;
+    max-width: calc(100vw - 20px);
+  }
+
+  .chat-fab {
+    right: 16px;
+    bottom: 16px;
+    width: 50px;
+    height: 50px;
+  }
+}
+
+/* Respect reduced-motion preferences */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* ========== Phone View Background (Mobile screens <= 768px) ========== */
+@media (max-width: 768px) {
+  /* Phone: smaller waves and grid, glows stacked top & bottom for tall screens.
+     (Original photo: url("/coast_phone.avif") ΓÇö see note near body::before.) */
+  body::before {
+    background-image:
+      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1600 160' preserveAspectRatio='none'%3E%3Cpath fill='%2338bdf8' fill-opacity='0.12' d='M0,80 C200,30 400,130 800,80 S1400,130 1600,80 L1600,160 L0,160 Z'/%3E%3C/svg%3E"),
+      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1600 200' preserveAspectRatio='none'%3E%3Cpath fill='%230284c7' fill-opacity='0.14' d='M0,100 C300,160 500,40 800,100 S1300,160 1600,100 L1600,200 L0,200 Z'/%3E%3C/svg%3E"),
+      linear-gradient(rgba(125, 175, 230, 0.045) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(125, 175, 230, 0.045) 1px, transparent 1px),
+      radial-gradient(ellipse 120% 40% at 50% 0%, rgba(56, 189, 248, 0.24), transparent 65%),
+      radial-gradient(ellipse 100% 35% at 100% 55%, rgba(2, 132, 199, 0.18), transparent 65%),
+      radial-gradient(ellipse 120% 35% at 50% 100%, rgba(56, 189, 248, 0.18), transparent 70%),
+      linear-gradient(180deg, #0b1528 0%, #0a1f3a 50%, #07162b 100%);
+    background-size:
+      900px 90px, 1000px 110px, 40px 40px, 40px 40px, auto, auto, auto, cover;
+  }
+}

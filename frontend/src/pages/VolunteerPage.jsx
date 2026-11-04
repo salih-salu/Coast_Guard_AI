@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import WeatherCard from "../components/WeatherCard";
 
 function VolunteerPage({ onLogout, onSOS }) {
   const navigate = useNavigate();
@@ -116,9 +117,12 @@ function VolunteerPage({ onLogout, onSOS }) {
         </div>
       </div>
 
+      {/* LIVE OPERATIONAL WEATHER */}
+      <WeatherCard title="🌊 Operational Coastal Weather (Live)" />
+
       {/* 2. GRID LAYOUT */}
       <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(320px, 1fr))", gap: "24px" }}>
-        
+
         {/* COMPONENT A: ACTIVE DISTRESS & RESCUE CALLS */}
         <div style={{ background: "var(--card)", border: "1px solid var(--line)", borderRadius: "18px", padding: "26px" }}>
           <h3 style={{ marginBottom: "16px", display: "flex", alignItems: "center", gap: "8px" }}>

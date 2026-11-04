@@ -1,0 +1,122 @@
+﻿:root {
+  /* ========== Deep Midnight Navy Theme ========== */
+  --bg: #0b1528;
+  --card: rgba(19, 34, 56, 0.82);       /* glass navy cards */
+  --card-solid: #132238;
+  --card-soft: rgba(30, 58, 95, 0.35);  /* inner tiles */
+  --line: rgba(125, 175, 230, 0.2);
+  --line-strong: rgba(56, 189, 248, 0.5);
+  --text: #f0f6fc;
+  --muted: #a3b3c9;
+  --accent: #38bdf8;
+  --accent-dark: #0284c7;
+  --accent-light: rgba(56, 189, 248, 0.15);
+
+  /* Alert colors */
+  --high: #f87171;
+  --medium: #fbbf24;
+  --low: #34d399;
+  --high-bg: rgba(248, 113, 113, 0.16);
+  --medium-bg: rgba(251, 191, 36, 0.16);
+  --low-bg: rgba(52, 211, 153, 0.16);
+
+  /* Supporting */
+  --sand: #2a2d34;
+  --deep-sea: #070e1b;
+  --radius: 16px;
+  --radius-sm: 12px;
+  --shadow: 0 6px 22px rgba(0, 0, 0, 0.4);
+  --shadow-hover: 0 10px 30px rgba(56, 189, 248, 0.18);
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: "Segoe UI", system-ui, -apple-system, sans-serif;
+  background-color: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ========== Themed Background (Desktop) ==========
+   Fixed layer behind all content: deep ocean gradient, cyan glows,
+   faint sonar grid and two soft waves at the bottom. */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background-image:
+    /* wave 1 (front) */
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1600 160' preserveAspectRatio='none'%3E%3Cpath fill='%2338bdf8' fill-opacity='0.10' d='M0,80 C200,30 400,130 800,80 S1400,130 1600,80 L1600,160 L0,160 Z'/%3E%3C/svg%3E"),
+    /* wave 2 (back) */
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1600 200' preserveAspectRatio='none'%3E%3Cpath fill='%230284c7' fill-opacity='0.12' d='M0,100 C300,160 500,40 800,100 S1300,160 1600,100 L1600,200 L0,200 Z'/%3E%3C/svg%3E"),
+    /* sonar grid */
+    linear-gradient(rgba(125, 175, 230, 0.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(125, 175, 230, 0.05) 1px, transparent 1px),
+    /* glows */
+    radial-gradient(ellipse 70% 55% at 12% 0%, rgba(56, 189, 248, 0.22), transparent 62%),
+    radial-gradient(ellipse 60% 50% at 92% 8%, rgba(2, 132, 199, 0.26), transparent 62%),
+    radial-gradient(ellipse 90% 40% at 50% 100%, rgba(56, 189, 248, 0.16), transparent 70%),
+    /* base ocean gradient */
+    linear-gradient(180deg, #0b1528 0%, #0a1f3a 55%, #07162b 100%);
+  background-repeat:
+    repeat-x, repeat-x, repeat, repeat, no-repeat, no-repeat, no-repeat, no-repeat;
+  background-position:
+    bottom left, bottom left, 0 0, 0 0, 0 0, 0 0, 0 0, 0 0;
+  background-size:
+    1600px 150px, 1800px 190px, 56px 56px, 56px 56px, auto, auto, auto, cover;
+}
+
+/* Original photo backgrounds kept for reference ΓÇö to use them instead,
+   remove the body::before block above and set on body:
+   background: linear-gradient(rgba(7,14,27,.6), rgba(7,14,27,.8)),
+               url("/coast_desktop.jpg") no-repeat center center fixed;
+   background-size: cover;                                              */
+
+a {
+  text-decoration: none;
+  color: inherit;
+}
+
+section[id] {
+  scroll-margin-top: 80px;
+}
+
+.container {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 0 20px;
+}
+
+.muted {
+  color: var(--muted);
+}
+
+.message {
+  color: var(--muted);
+  text-align: center;
+  padding: 16px 20px;
+  font-size: 14px;
+}
+
+.error-message {
+  color: #fecaca;
+  background: rgba(127, 29, 29, 0.55);
+  border: 1px solid rgba(248, 113, 113, 0.5);
+  border-radius: var(--radius-sm);
+  margin: 12px auto;
+  max-width: 560px;
+}
+
