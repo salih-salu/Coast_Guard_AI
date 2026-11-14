@@ -4,7 +4,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from . import database
-from .routers import admin, alerts, assignments, contacts, incidents, location, messages, precaution, shelters, sos, users, volunteers, weather
+from .routers import admin, alerts, assignments, chat, contacts, incidents, location, messages, precaution, shelters, sos, users, volunteers, weather
 
 
 @asynccontextmanager
@@ -36,6 +36,7 @@ app.include_router(alerts.router)
 app.include_router(contacts.router)
 app.include_router(precaution.router)
 app.include_router(weather.router)
+app.include_router(chat.router)
 app.include_router(sos.router)
 app.include_router(incidents.router)
 app.include_router(messages.router)
@@ -44,4 +45,3 @@ app.include_router(admin.router)
 app.include_router(users.router)
 app.include_router(volunteers.router)
 app.include_router(assignments.router)
-
