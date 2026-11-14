@@ -40,9 +40,11 @@ function Navbar({ currentUser, onLogin, onRegister, onLogout, onSOS }) {
               </button>
             </>
           )}
-          <button className="btn btn-sos" onClick={onSOS}>
-            🚨 SOS
-          </button>
+          {(currentUser?.role || "").toLowerCase() !== "admin" && (
+            <button className="btn btn-sos" onClick={onSOS}>
+              🚨 SOS
+            </button>
+          )}
         </div>
       </div>
     </nav>

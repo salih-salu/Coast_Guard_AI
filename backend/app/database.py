@@ -36,3 +36,4 @@ def fetch_all(sql, params=None):
 def fetch_one(sql, params=None):
     with pool.connection() as conn:
         return conn.execute(sql, params).fetchone()
+    

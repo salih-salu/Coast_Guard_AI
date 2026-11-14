@@ -9,7 +9,7 @@ import UserPage from "./pages/UserPage";
 import VolunteerPage from "./pages/VolunteerPage";
 import AdminPage from "./pages/AdminPage";
 import KeralaMap from "./components/KeralaMap";
-import { getHealthCheck } from "./services/api";
+import { getHealthCheck, setUserDutyStatus } from "./services/api";
 
 function App() {
   const [currentUser, setCurrentUser] = useState(null);
@@ -49,7 +49,14 @@ function App() {
     }
   }, []);
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
+    if (currentUser && ["volunteer", "lifeguard", "coastal_guard", "guide"].includes((currentUser.role || "").toLowerCase())) {
+      try {
+        await setUserDutyStatus(currentUser.email || currentUser.id, false);
+      } catch (e) {
+        console.warn("Could not set duty status on logout:", e);
+      }
+    }
     localStorage.removeItem("user");
     setCurrentUser(null);
     navigate("/");

@@ -70,7 +70,14 @@ function AuthModal({ mode, setMode, onClose, onLoginSuccess }) {
           navigate("/volunteer");
         }
       } catch (err) {
-        alert("Login failed: " + (err.response?.data?.detail || "Invalid email or password"));
+        let errMsg = "Invalid email or password";
+        const detail = err.response?.data?.detail;
+        if (typeof detail === "string") {
+          errMsg = detail;
+        } else if (Array.isArray(detail)) {
+          errMsg = detail.map((d) => d.msg || JSON.stringify(d)).join(", ");
+        }
+        alert("Login failed: " + errMsg);
       } finally {
         setSubmitting(false);
       }
@@ -83,7 +90,16 @@ function AuthModal({ mode, setMode, onClose, onLoginSuccess }) {
       alert("Registration successful! You can now log in.");
       setMode("login");
     } catch (err) {
-      alert("Registration failed: " + (err.response?.data?.detail || err.message));
+      let errMsg = err.message;
+      const detail = err.response?.data?.detail;
+      if (typeof detail === "string") {
+        errMsg = detail;
+      } else if (Array.isArray(detail)) {
+        errMsg = detail.map((d) => d.msg || JSON.stringify(d)).join(", ");
+      } else if (detail) {
+        errMsg = JSON.stringify(detail);
+      }
+      alert("Registration failed: " + errMsg);
     } finally {
       setSubmitting(false);
     }
@@ -151,7 +167,7 @@ function AuthModal({ mode, setMode, onClose, onLoginSuccess }) {
           <input
             type="text"
             name="email"
-            placeholder="Email address"
+            placeholder={isLogin ? "Email or Username" : "Email address"}
             value={formData.email}
             onChange={handleChange}
             required

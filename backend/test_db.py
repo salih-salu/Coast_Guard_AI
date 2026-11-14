@@ -7,52 +7,36 @@ def run_test():
     open_pool()
 
     try:
-        # 1. Test database connectivity
+        # 1. Test database connection
         res = fetch_one("SELECT NOW() AS current_time")
         print(f"Connected! Database Time: {res['current_time']}")
 
-        # 2. Find admin-related tables
+        # 2. Fetch all tables from the database
         tables = fetch_all("""
-            SELECT table_name
+            SELECT
+                table_schema,
+                table_name,
+                table_type
             FROM information_schema.tables
-            WHERE table_schema = 'public'
-              AND table_type = 'BASE TABLE'
-              AND (
-                  table_name ILIKE '%admin%'
-                  OR table_name ILIKE '%role%'
-                  OR table_name ILIKE '%permission%'
-                  OR table_name ILIKE '%setting%'
-                  OR table_name ILIKE '%user%'
-                  OR table_name ILIKE '%guard%'
-                  OR table_name ILIKE '%location%'
-                  OR table_name ILIKE '%alert%'
-                  OR table_name ILIKE '%report%'
-              )
-            ORDER BY table_name
+            WHERE table_schema NOT IN (
+                'pg_catalog',
+                'information_schema'
+            )
+            ORDER BY table_schema, table_name
         """)
 
-        print("\n========== ADMIN RELATED TABLES & COLUMNS ==========")
+        print("\n========== ALL DATABASE TABLES ==========")
 
-        if not tables:
-            print("No matching tables found.")
+        if tables:
+            print(f"Total Tables: {len(tables)}")
 
-        for table in tables:
-            table_name = table['table_name']
-
-            print(f"\nTable: {table_name}")
-            print("-" * 45)
-
-            # 3. Get column names
-            columns = fetch_all("""
-                SELECT column_name, data_type
-                FROM information_schema.columns
-                WHERE table_schema = 'public'
-                  AND table_name = %s
-                ORDER BY ordinal_position
-            """, (table_name,))
-
-            for column in columns:
-                print(f"  - {column['column_name']} ({column['data_type']})")
+            for index, table in enumerate(tables, start=1):
+                print(f"\nTable {index}:")
+                print(f"  Schema: {table['table_schema']}")
+                print(f"  Name: {table['table_name']}")
+                print(f"  Type: {table['table_type']}")
+        else:
+            print("No tables found.")
 
     except Exception as e:
         print(f"\nDatabase Error: {e}")

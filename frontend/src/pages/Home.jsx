@@ -8,6 +8,7 @@ function Home({ onSOS }) {
   const [weather, setWeather] = useState(null);
   const [contactsList, setContactsList] = useState(defaultContacts);
   const [showAllContacts, setShowAllContacts] = useState(false);
+  const [showAllAlerts, setShowAllAlerts] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
   const [gpsEnabled, setGpsEnabled] = useState(true);
@@ -340,8 +341,20 @@ function Home({ onSOS }) {
       {/* ACTIVE ALERTS LIST */}
       {!loading && (
         <section className="container block" id="alerts">
-          <div className="section-header">
-            <h2 className="section-title">🚨 Active Alerts for Coastal Areas</h2>
+          <div
+            className="section-header"
+            style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: "10px" }}
+          >
+            <h2 className="section-title" style={{ margin: 0 }}>🚨 Active Alerts for Coastal Areas</h2>
+            {alerts.length > 6 && (
+              <button
+                className="btn btn-ghost"
+                style={{ fontSize: "13px", padding: "6px 14px", border: "1px solid var(--line)" }}
+                onClick={() => setShowAllAlerts(!showAllAlerts)}
+              >
+                {showAllAlerts ? "Show Less ▲" : `Show More (${alerts.length - 6}) ▼`}
+              </button>
+            )}
           </div>
 
           <div className="stats">
@@ -363,7 +376,14 @@ function Home({ onSOS }) {
             </div>
           </div>
 
-          <div className="alert-grid">
+          <div
+            className="alert-grid"
+            style={{
+              maxHeight: showAllAlerts ? "none" : "360px",
+              overflowY: "auto",
+              paddingRight: "4px",
+            }}
+          >
             {alerts.map((a) => {
               const riskKey = (a.risk || "medium").toLowerCase();
               return (
@@ -379,6 +399,18 @@ function Home({ onSOS }) {
               );
             })}
           </div>
+
+          {alerts.length > 6 && !showAllAlerts && (
+            <div style={{ textAlign: "center", marginTop: "14px" }}>
+              <button
+                className="btn btn-ghost"
+                style={{ fontSize: "13px", padding: "6px 16px", border: "1px solid var(--line)", borderRadius: "999px" }}
+                onClick={() => setShowAllAlerts(true)}
+              >
+                Show All {alerts.length} Alerts ▼
+              </button>
+            </div>
+          )}
         </section>
       )}
 
