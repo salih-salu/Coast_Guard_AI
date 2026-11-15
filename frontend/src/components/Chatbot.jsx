@@ -4,7 +4,7 @@ function getReply(text) {
   const t = text.toLowerCase();
   if (t.includes("weather") || t.includes("wave")) return "Check the Weather section for live wave height, wind and visibility.";
   if (t.includes("alert") || t.includes("risk")) return "Active alerts are shown in the Alerts section, colored by High, Medium and Low risk.";
-  if (t.includes("emergency") || t.includes("help") || t.includes("sos")) return "Press the red SOS button at the top for emergency numbers. Coast Guard helpline: 1554.";
+  if (t.includes("emergency") || t.includes("help") || t.includes("sos")) return "Press the red SOS button at the top for emergency numbers. Coast Guard helpline: 7736596093.";
   if (t.includes("fish")) return "Always check wave height and wind before going to sea. Avoid the sea when risk is High.";
   return "I can help with weather, alerts and emergency contacts. Try asking: 'Is it safe to go fishing?'";
 }
